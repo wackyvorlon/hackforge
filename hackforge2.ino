@@ -269,65 +269,7 @@ void checkcard( void )
   
 }
 
-void delcard( void ) {
-  byte tmpr,tmpe;
-  lcd.clear();
-  lcd.print("Swipe to delete.");
-  while (r1Count < 26) {
-    //Wait for tag..
-  }
-  
-  r3=r1;
-  tmpr=r3&0xFF;
-  r3>>=8;
-  Serial.print("\nRead number: ");
-  Serial.println(r1);
-  Serial.print("\nByte to search for: ");
-  Serial.println(tmpr);
-  for (int i=1;i<endaddr;i=i+4)
-    {
-      tmpe=EEPROM.read(i);
-      if (tmpe==tmpr) {
-        Serial.print("\nFirst byte found at address: ");
-        Serial.println(i);
-        // Check entire number.
-        for (int j=1; j<4;j++)
-        {
-          tmpr=r3&0xFF;
-          tmpe=EEPROM.read(i+j);
-          Serial.print("\nChecking byte ");
-          Serial.println(j);
-          if (tmpr!=tmpe) {
-            //lcd.print("Denied.");
-            Serial.println("Nope, not here!");
-            //return;
-            deny=true;
-            //break;
-          }
-          r3>>=8;
-        }
-        
-        //There may or may not be a bug here.
-        //If first byte shared by two cards, with differing subsequent bytes,
-        //may inappropriately deny access.
-        if (deny && i>=endaddr-3) {
-          Serial.print("\nCurrent address: ");
-          Serial.println(i);
-          Serial.println("Access denied.");
-          return;
-        } 
-      printtag();
-      }
-    }
-    
-  //lcd.print("Denied.");
-  //Serial.println("Access denied.");
-  //printtag();
-  r1=0;
-  r1Count=0;
-  
-}
-  
+
   
 
 void printtag(void) {
