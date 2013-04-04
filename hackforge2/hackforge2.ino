@@ -44,6 +44,7 @@
 uint8_t latest_interrupted_pin;
 int addr=1;
 int endaddr=0;
+int locked=1; // Current state of lock.
 
 
 void quicfunc() {
@@ -107,10 +108,18 @@ void loop() {
 // Functions to read the bits
 
 void unlock(void) {
-  Serial.print("Unlocking\n");
+  /*Serial.print("Unlocking\n");
   digitalWrite(10, HIGH);
   delay(1000);
-  digitalWrite(10, LOW);
+  digitalWrite(10, LOW);*/
+  // Modified for latching.
+  if (locked==0) { // Door is unlocked
+    locked = 1;
+    digitalWrite(10,LOW);
+  } else {        // Door is locked.
+    locked = 0;
+    digitalWrite(10,HIGH);
+  }
 }
 
 byte value; //Value written to eeprom
