@@ -1,5 +1,9 @@
-Access code for Hackforge
+**Access code for Hackforge**
 
 This is the basic code for the access system at hackforge. It is still very rough, and a work in progress.
 
+*7 May, 2013:*
 
+Squashed a bug that appeared when EEPROM is wiped. EEPROM happens to be wiped every time new code is loaded :/ I am going to have to figure out how to change that. There is another bug which remains and needs to be remedied. The code as it stands only checks the whole number if the first byte matches first. As you can imagine, if two cards share the same initial byte, one of them will be denied access inappropriately. I need to tweak this.
+
+It is also evident that we will need a better way of managing card numbers. I must give this thorough consideration.
