@@ -47,13 +47,22 @@ int endaddr=0;
 int locked=1; // Current state of lock.
 
 
+
+
+// initialize the library with the numbers of the interface pins
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
 void quicfunc() {
   latest_interrupted_pin=PCintPort::arduinoPin;
   if (latest_interrupted_pin == 6) {
     read1();
+    //lcd.setCursor(0,1);
+    //lcd.print("Read");
   }
   if (latest_interrupted_pin == 7) {
     read0();
+    //lcd.setCursor(0,1);
+    //lcd.print("read");
   }
  /*if (latest_interrupted_pin == 9) {
     if (digitalRead(9)== LOW) {
@@ -61,9 +70,6 @@ void quicfunc() {
     }
   }*/
 }
-
-// initialize the library with the numbers of the interface pins
-LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 void setup() {
   // set up the LCD's number of columns and rows: 
@@ -76,9 +82,17 @@ void setup() {
   Serial.begin(9600);
   Serial.print("\nSystem waiting for tag.\n");
   endaddr=EEPROM.read(0);
+  if ( endaddr == 255 ) {
+    endaddr=1;
+    EEPROM.write(0,endaddr);
+    lcd.setCursor(0,0);
+    lcd.print("reset address!");
+    delay(5000);
+  }
   Serial.print("Current EEPROM end address: ");
   Serial.println(endaddr);
-  addr=endaddr;
+  endaddr=EEPROM.read(0);
+  
 }
 
 volatile unsigned long r1=0;
@@ -90,12 +104,18 @@ void loop() {
   // set the cursor to column 0, line 1
   // (note: line 1 is the second row, since counting begins with 0):
   lcd.setCursor(0, 0);
+  addr=endaddr;
   lcd.print("Waiting for tag...");
   lcd.setCursor(0,1);
+  lcd.print(endaddr);
   if (r1Count >= 26) {
     checkcard();
+    delay(1000);
     lcd.clear();
   }
+  //lcd.setCursor(0,1);
+  //lcd.print(r1Count);
+  //delay(1000);
   //delay(500);
   //lcd.print(r1);
   // print the number of seconds since reset:
@@ -213,6 +233,7 @@ void writecard(void) {
       r1=0;
     }
   }
+  endaddr=EEPROM.read(0);
   r1Count=0;
   
 }
@@ -226,10 +247,16 @@ void checkcard( void )
   boolean deny=false;
   endaddr=EEPROM.read(0);
   
+  //lcd.setCursor(0,1);
+  //lcd.print("Snuggle");
+  
   //Copy value into a temp buffer.
   r3=r1;
   tmpr=r3&0xFF;
   r3>>=8;
+  
+  lcd.setCursor(0,1);
+  //lcd.print(tmpr);
   Serial.print("\nRead number: ");
   Serial.println(r1);
   Serial.print("\nByte to search for: ");
@@ -237,9 +264,17 @@ void checkcard( void )
   for (int i=1;i<endaddr;i=i+4)
     {
       tmpe=EEPROM.read(i);
+      /*lcd.print(tmpe);
+      lcd.print(" ");
+      lcd.print(i);
+      lcd.setCursor(0,1);
+      delay(500);
+      lcd.clear();*/
       if (tmpe==tmpr) {
         Serial.print("\nFirst byte found at address: ");
         Serial.println(i);
+        lcd.print("First byte: ");
+        lcd.print(i);
         // Check entire number.
         for (int j=1; j<4;j++)
         {
@@ -264,6 +299,8 @@ void checkcard( void )
           Serial.print("\nCurrent address: ");
           Serial.println(i);
           Serial.println("Access denied.");
+          lcd.setCursor(0,1);
+          lcd.print("Access denied.");
           return;
         } 
       printtag();
@@ -296,6 +333,8 @@ void printtag(void) {
 void read1(void) {
   if (digitalRead(6)==LOW) {
     r1Count++;
+    //lcd.setCursor(0,1);
+    //lcd.print(r1Count);
     r1 = r1 << 1;
     r1 |= 1;
   }
